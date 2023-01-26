@@ -1,5 +1,13 @@
 version: '3.8'
 services:
+  postgres:
+    container_name: postgres
+    image: postgres:alpine
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=Products
   redis-master:
     container_name: redis-master
     image: redis:alpine

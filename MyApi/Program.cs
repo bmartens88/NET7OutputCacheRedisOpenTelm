@@ -14,7 +14,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
     };
 });
 builder.Services.AddRedisOutputCache();
-builder.Services.AddDbContextPool<AppDbContext>(
+builder.Services.AddDbContext<AppDbContext>(
     opts => opts.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
 var app = builder.Build();
@@ -44,6 +44,12 @@ app.MapGet("/products", async (AppDbContext context, CancellationToken ctx) =>
     var res = products.Select(p => p.AsDto()).ToList();
     return Results.Ok(res);
 }).CacheOutput();
+
+// Seed database if required
+var factory = app.Services.GetRequiredService<IServiceScopeFactory>();
+using var scope = factory.CreateScope();
+await using var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+await context.Database.EnsureCreatedAsync();
 
 app.Run();
 
